@@ -112,3 +112,7 @@ outputs/
 .vscode/
 .idea/
 __MACOSX/
+
+# Project-specific additions (not part of the original template)
+misc/
+venvasr/
