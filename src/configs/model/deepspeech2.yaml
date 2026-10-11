@@ -1,0 +1,20 @@
+_target_: src.model.deepspeech2_model.DeepSpeech2Model
+
+n_feats: 128
+
+conv_params: # from original paper
+  - out_channels: 32
+    kernel_size: [41, 11]
+    stride: [2, 2]
+    padding: [20, 5]
+    dilation: [1, 1]
+
+  - out_channels: 32
+    kernel_size: [21, 11]
+    stride: [2, 1]
+    padding: [10, 5]
+    dilation: [1, 1]
+
+rnn_gru_params:
+  hidden_size: 512
+  num_layers: 5
