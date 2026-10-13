@@ -2,8 +2,8 @@ defaults:
   - model: deepspeech2
   - writer: wandb
   - metrics: example
-  - datasets: librispeech_baseline
-  - dataloader: asr
+  - datasets: librispeech_baseline_kaggle
+  - dataloader: asr_kaggle
   - transforms: example_only_instance
   - override transforms/instance_transforms: log_mel
   - _self_
