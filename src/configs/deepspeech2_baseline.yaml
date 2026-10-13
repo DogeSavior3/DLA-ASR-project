@@ -5,6 +5,7 @@ defaults:
   - datasets: librispeech_baseline
   - dataloader: asr
   - transforms: example_only_instance
+  - override transforms/instance_transforms: log_mel
   - _self_
 writer:
   run_name: DS2_baseline
@@ -24,7 +25,7 @@ text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 trainer:
   log_step: 50
-  n_epochs: 50
+  n_epochs: 7
   epoch_len: 200
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
