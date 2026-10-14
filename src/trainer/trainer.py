@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import torch
 
 from src.logger.utils import plot_spectrogram
 from src.metrics.tracker import MetricTracker
@@ -40,17 +41,33 @@ class Trainer(BaseTrainer):
             metric_funcs = self.metrics["train"]
             self.optimizer.zero_grad()
 
-        outputs = self.model(**batch)
+        with torch.autocast(
+            device_type=torch.device(self.device).type,
+            dtype=self.amp_dtype,
+            enabled=self.amp_enabled,
+        ):
+            outputs = self.model(**batch)
         batch.update(outputs)
 
+        batch["log_probs"] = batch[
+            "log_probs"
+        ].float()  # torch doc says that ctc loss can not work with amp
         all_losses = self.criterion(**batch)
         batch.update(all_losses)
 
         if self.is_train:
-            batch["loss"].backward()  # sum of all losses is always called loss
+            self.scaler.scale(
+                batch["loss"]
+            ).backward()  # sum of all losses is always called loss
+            self.scaler.unscale_(self.optimizer)
             self._clip_grad_norm()
-            self.optimizer.step()
-            if self.lr_scheduler is not None:
+
+            scale_before = self.scaler.get_scale()
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
+
+            step_succeeded = self.scaler.get_scale() >= scale_before
+            if step_succeeded and self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 
         # update metrics for each loss (in case of multiple losses)

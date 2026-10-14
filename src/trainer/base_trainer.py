@@ -63,6 +63,13 @@ class BaseTrainer:
         self.cfg_trainer = self.config.trainer
 
         self.device = device
+        self.amp_enabled = self.config.precision.enabled
+        self.amp_dtype = {"float16": torch.float16}[self.config.precision.dtype]
+
+        if self.amp_enabled and torch.device(self.device).type != "cuda":
+            raise ValueError("AMP FP16 requires CUDA")
+
+        self.scaler = torch.amp.GradScaler("cuda", enabled=self.amp_enabled)
         self.skip_oom = skip_oom
 
         self.logger = logger
@@ -175,7 +182,7 @@ class BaseTrainer:
 
             # print logged information to the screen
             for key, value in logs.items():
-                self.logger.info(f"    {key:15s}: {value}")
+                self.logger.info("    %-15s: %s", key, value)
 
             # evaluate model performance according to configured metric,
             # save best checkpoint as model_best
@@ -472,6 +479,7 @@ class BaseTrainer:
             "state_dict": self.model.state_dict(),
             "optimizer": self.optimizer.state_dict(),
             "lr_scheduler": self.lr_scheduler.state_dict(),
+            "scaler": self.scaler.state_dict(),
             "monitor_best": self.mnt_best,
             "config": self.config,
         }
@@ -527,6 +535,8 @@ class BaseTrainer:
         else:
             self.optimizer.load_state_dict(checkpoint["optimizer"])
             self.lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+            if self.amp_enabled and "scaler" in checkpoint and checkpoint["scaler"]:
+                self.scaler.load_state_dict(checkpoint["scaler"])
 
         self.logger.info(
             f"Checkpoint loaded. Resume training from epoch {self.start_epoch}"

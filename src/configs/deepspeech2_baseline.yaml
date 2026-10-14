@@ -4,6 +4,7 @@ defaults:
   - metrics: example
   - environment: kaggle
   - transforms: example_only_instance
+  - precision: amp_fp16
   - override transforms/instance_transforms: log_mel
   - _self_
 writer:
@@ -20,7 +21,7 @@ loss_function:
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 trainer:
-  log_step: 50
+  log_step: 13
   n_epochs: 5
   epoch_len: null
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
