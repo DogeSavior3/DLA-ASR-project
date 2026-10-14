@@ -3,9 +3,9 @@ train:
   part: "train-clean-100"
   data_dir: "/kaggle/input/datasets/a24998667/librispeech"
   index_dir: "/kaggle/working/librispeech_indexes"
-  limit: 5000
+  limit: 10000
   shuffle_index: true
-  max_audio_length: 15
+  max_audio_length: 25
   instance_transforms: ${transforms.instance_transforms.train}
 val:
   _target_: src.datasets.librispeech_dataset_kaggle.LibrispeechDatasetKaggle
