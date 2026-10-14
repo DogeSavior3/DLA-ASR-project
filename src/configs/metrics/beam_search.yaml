@@ -1,0 +1,32 @@
+train: []
+inference:
+  - _target_: src.metrics.cer.BeamSearchCERMetric
+    name: 'CER_(Beam1)'
+    beam_size: 1
+  - _target_: src.metrics.wer.BeamSearchWERMetric
+    name: 'WER_(Beam1)'
+    beam_size: 1
+  - _target_: src.metrics.cer.BeamSearchCERMetric
+    name: 'CER_(Beam3)'
+    beam_size: 3
+  - _target_: src.metrics.wer.BeamSearchWERMetric
+    name: 'WER_(Beam3)'
+    beam_size: 3
+  - _target_: src.metrics.cer.BeamSearchCERMetric
+    name: 'CER_(Beam5)'
+    beam_size: 5
+  - _target_: src.metrics.wer.BeamSearchWERMetric
+    name: 'WER_(Beam5)'
+    beam_size: 5
+  - _target_: src.metrics.cer.BeamSearchCERMetric
+    name: 'CER_(Beam10)'
+    beam_size: 10
+  - _target_: src.metrics.wer.BeamSearchWERMetric
+    name: 'WER_(Beam10)'
+    beam_size: 10
+  - _target_: src.metrics.cer.BeamSearchCERMetric
+    name: 'CER_(Beam20)'
+    beam_size: 20
+  - _target_: src.metrics.wer.BeamSearchWERMetric
+    name: 'WER_(Beam20)'
+    beam_size: 20
