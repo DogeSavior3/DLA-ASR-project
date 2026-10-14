@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /datasets: librispeech_baseline_kaggle
+  - /dataloader: asr_kaggle
+  - _self_
