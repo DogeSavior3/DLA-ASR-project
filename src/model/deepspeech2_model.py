@@ -81,7 +81,7 @@ class DeepSpeech2Model(nn.Module):
         x = x.reshape(B, L, C * F)
 
         for block in self.rnn_layers:
-            x = block(x)
+            x = block(x, output_lengths)
 
         logits = self.fc(x)
         log_probs = logits.log_softmax(dim=-1)
