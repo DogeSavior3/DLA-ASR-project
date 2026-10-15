@@ -18,3 +18,4 @@ conv_params: # from original paper
 rnn_gru_params:
   hidden_size: 512
   num_layers: 5
+  normalization: layernorm

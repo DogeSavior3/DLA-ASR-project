@@ -27,21 +27,28 @@ class ConvBlock(nn.Module):
 
 
 class RNNGRUBlock(nn.Module):
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, input_size, hidden_size, normalization="batchnorm"):
         super().__init__()
+        self.normalization = normalization
         self.rnn = nn.GRU(
             input_size=input_size,
             hidden_size=hidden_size,
             batch_first=True,
             bidirectional=True,
         )
-        self.bn = nn.BatchNorm1d(2 * hidden_size)
+        if normalization == "batchnorm":
+            self.bn = nn.BatchNorm1d(2 * hidden_size)
+        elif normalization == "layernorm":
+            self.ln = nn.LayerNorm(2 * hidden_size)
 
     def forward(self, x):
         # x: (B, L, input_size)
         x, _ = self.rnn(x)
         # x: (B, L, 2 * hidden_size)
-        x = x.transpose(1, 2)  # bn takes (B, H, L)
-        x = self.bn(x)
-        x = x.transpose(1, 2)
+        if self.normalization == "batchnorm":
+            x = x.transpose(1, 2)  # bn takes (B, H, L)
+            x = self.bn(x)
+            x = x.transpose(1, 2)
+        else:
+            x = self.ln(x)
         return x

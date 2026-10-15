@@ -41,7 +41,9 @@ class DeepSpeech2Model(nn.Module):
         rnn_input_size = in_channels * freq
         self.rnn_layers.append(
             RNNGRUBlock(
-                input_size=rnn_input_size, hidden_size=rnn_gru_params.hidden_size
+                input_size=rnn_input_size,
+                hidden_size=rnn_gru_params.hidden_size,
+                normalization=rnn_gru_params.normalization,
             )
         )
 
@@ -50,6 +52,7 @@ class DeepSpeech2Model(nn.Module):
                 RNNGRUBlock(
                     input_size=2 * rnn_gru_params.hidden_size,
                     hidden_size=rnn_gru_params.hidden_size,
+                    normalization=rnn_gru_params.normalization,
                 )
             )
         self.fc = nn.Linear(2 * rnn_gru_params.hidden_size, n_tokens)
