@@ -7,6 +7,7 @@ from omegaconf import OmegaConf
 
 from src.datasets.data_utils import get_dataloaders
 from src.trainer import Trainer
+from src.utils.augmentation_demo import log_augmentation_demo
 from src.utils.init_utils import set_random_seed, setup_saving_and_logging
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -39,6 +40,11 @@ def main(config):
     # setup data_loader instances
     # batch_transforms should be put on device
     dataloaders, batch_transforms = get_dataloaders(config, text_encoder, device)
+
+    demo_config = hydra.compose(
+        config_name="transforms/instance_transforms/demo"
+    ).transforms.instance_transforms.train
+    log_augmentation_demo(dataloaders["train"], writer, demo_config)
 
     # build model architecture, then print to console
     model = instantiate(config.model, n_tokens=len(text_encoder)).to(device)
