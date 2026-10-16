@@ -1,13 +1,13 @@
 train:
   _target_: src.datasets.LibrispeechDataset
-  part: "train-clean-100"
-  limit: 10000
+  part: "train-clean-360"
+  limit: null
   shuffle_index: true
   max_audio_length: 100
   instance_transforms: ${transforms.instance_transforms.train}
 val:
   _target_: src.datasets.LibrispeechDataset
   part: "dev-clean"
-  limit: 1000
+  limit: null
   shuffle_index: true
   instance_transforms: ${transforms.instance_transforms.inference}

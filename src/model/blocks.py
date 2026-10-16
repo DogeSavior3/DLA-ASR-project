@@ -44,12 +44,12 @@ class RNNGRUBlock(nn.Module):
 
     def forward(self, x, lengths):
         # x: (B, L, input_size)
-        total_length = x.shape[1]
-        x = pack_padded_sequence(
-            x, lengths.cpu(), batch_first=True, enforce_sorted=False
-        )
+        # total_length = x.shape[1]
+        # x = pack_padded_sequence(
+        #     x, lengths.cpu(), batch_first=True, enforce_sorted=False
+        # )
         x, _ = self.rnn(x)
-        x, _ = pad_packed_sequence(x, batch_first=True, total_length=total_length)
+        # x, _ = pad_packed_sequence(x, batch_first=True, total_length=total_length)
         # x: (B, L, 2 * hidden_size)
         if self.normalization == "batchnorm":
             x = x.transpose(1, 2)  # bn takes (B, H, L)
