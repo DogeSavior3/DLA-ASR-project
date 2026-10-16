@@ -1,0 +1,12 @@
+defaults:
+  - librispeech_baseline
+  - _self_
+
+train:
+  part: "train-clean-100"
+  limit: 3
+  max_audio_length: 10
+
+val:
+  limit: 3
+  max_audio_length: 10
