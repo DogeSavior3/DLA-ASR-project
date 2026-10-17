@@ -1,0 +1,9 @@
+defaults:
+  - librispeech_baseline
+  - _self_
+
+train:
+  part: "train-other-500"
+
+val:
+  part: "dev-other"

@@ -1,0 +1,15 @@
+defaults:
+  - deepspeech2_baseline
+  - override datasets: librispeech_other_${environment}
+  - override transforms/instance_transforms: augmented_log_mel
+  - _self_
+
+writer:
+  run_name: DS2_other_baseline
+
+optimizer:
+  lr: 3e-4
+
+trainer:
+  n_epochs: 15
+  log_step: 200
