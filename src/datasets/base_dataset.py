@@ -81,6 +81,10 @@ class BaseDataset(Dataset):
         data_dict = self._index[ind]
         audio_path = data_dict["path"]
         audio = self.load_audio(audio_path)
+        if self.instance_transforms is not None:
+            audio_transform = self.instance_transforms.get("audio")
+            if audio_transform is not None:
+                audio = audio_transform(audio)
         text = data_dict["text"]
         text_encoded = self.text_encoder.encode(text)
 
@@ -143,7 +147,7 @@ class BaseDataset(Dataset):
         """
         if self.instance_transforms is not None:
             for transform_name in self.instance_transforms.keys():
-                if transform_name == "get_spectrogram":
+                if transform_name in ("get_spectrogram", "audio"):
                     continue  # skip special key
                 instance_data[transform_name] = self.instance_transforms[
                     transform_name
@@ -178,7 +182,7 @@ class BaseDataset(Dataset):
             )
             _total = exceeds_audio_length.sum()
             logger.info(
-                f"{_total} ({_total / initial_size:.1%}) records are longer then "
+                f"{_total} ({format(_total / initial_size, '.1%')}) records are longer then "
                 f"{max_audio_length} seconds. Excluding them."
             )
         else:
@@ -194,7 +198,7 @@ class BaseDataset(Dataset):
             )
             _total = exceeds_text_length.sum()
             logger.info(
-                f"{_total} ({_total / initial_size:.1%}) records are longer then "
+                f"{_total} ({format(_total / initial_size, '.1%')}) records are longer then "
                 f"{max_text_length} characters. Excluding them."
             )
         else:
@@ -206,7 +210,9 @@ class BaseDataset(Dataset):
             _total = records_to_filter.sum()
             index = [el for el, exclude in zip(index, records_to_filter) if not exclude]
             logger.info(
-                f"Filtered {_total} ({_total / initial_size:.1%}) records  from dataset"
+                "Filtered %s (%s) records  from dataset",
+                _total,
+                format(_total / initial_size, ".1%"),
             )
 
         return index
