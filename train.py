@@ -1,6 +1,8 @@
 import warnings
 
 import hydra
+import librosa.effects
+import sklearn
 import torch
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
