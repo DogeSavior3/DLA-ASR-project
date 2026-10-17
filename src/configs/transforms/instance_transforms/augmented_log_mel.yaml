@@ -14,11 +14,11 @@ train:
         p: 0.2
         noise_std: 0.003
       - _target_: src.transforms.wav_augs.time_stretch.TimeStretch
-        p: 0.2
+        p: 0.0
         min_rate: 0.9
         max_rate: 1.1
       - _target_: src.transforms.wav_augs.pitch_shift.PitchShift
-        p: 0.15
+        p: 0.0
         sample_rate: 16000
         min_steps: -2
         max_steps: 2
@@ -26,8 +26,8 @@ train:
     _target_: torchvision.transforms.v2.Compose
     transforms:
       - _target_: src.transforms.spec_augs.frequency_masking.FrequencyMasking
-        p: 0.5
+        p: 0.25
         freq_mask_param: 16
       - _target_: src.transforms.spec_augs.time_masking.TimeMasking
-        p: 0.5
+        p: 0.25
         time_mask_param: 40
