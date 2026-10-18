@@ -5,6 +5,7 @@ defaults:
   - environment: kaggle
   - transforms: example_only_instance
   - precision: amp_fp16
+  - lr_scheduler: constant
   - override transforms/instance_transforms: log_mel
   - _self_
 writer:
@@ -12,10 +13,6 @@ writer:
 optimizer:
   _target_: torch.optim.AdamW
   lr: 3e-4
-lr_scheduler:
-  _target_: torch.optim.lr_scheduler.ConstantLR
-  factor: 1.0
-  total_iters: 1
 loss_function:
   _target_: src.loss.CTCLossWrapper
 text_encoder:
