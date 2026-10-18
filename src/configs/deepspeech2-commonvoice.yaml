@@ -1,0 +1,16 @@
+defaults:
+  - deepspeech2-other
+  - override datasets: common_voice_baseline_kaggle
+  - _self_
+
+writer:
+  run_name: DS2_commonvoice_baseline
+
+optimizer:
+  lr: 2e-4
+
+lr_scheduler:
+  max_lr: 2e-4
+
+trainer:
+  n_epochs: 15

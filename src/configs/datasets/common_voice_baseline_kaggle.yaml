@@ -1,0 +1,17 @@
+train:
+  _target_: src.datasets.common_voice_dataset_kaggle.CommonVoiceDatasetKaggle
+  part: ["cv-valid-train", "cv-valid-dev", "cv-valid-test"]
+  data_dir: "/kaggle/input/datasets/mikhailkorol/common-voice-valid-flac-16-khz-mono/common_voice_prepared"
+  index_dir: "/kaggle/input/datasets/mikhailkorol/common-voice-valid-flac-16-khz-mono/common_voice_indexes"
+  limit: null
+  shuffle_index: true
+  max_audio_length: 100
+  instance_transforms: ${transforms.instance_transforms.train}
+val:
+  _target_: src.datasets.librispeech_dataset_kaggle.LibrispeechDatasetKaggle
+  part: "dev-other"
+  data_dir: "/kaggle/input/datasets/a24998667/librispeech"
+  index_dir: "/kaggle/working/librispeech_indexes"
+  limit: null
+  shuffle_index: true
+  instance_transforms: ${transforms.instance_transforms.inference}

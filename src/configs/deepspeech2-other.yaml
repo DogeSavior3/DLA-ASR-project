@@ -9,7 +9,7 @@ writer:
   run_name: DS2_other_baseline
 
 optimizer:
-  lr: 2e-4
+  lr: 3e-4
 
 trainer:
   n_epochs: 5

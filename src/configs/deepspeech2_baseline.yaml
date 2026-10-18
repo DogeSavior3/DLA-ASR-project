@@ -19,7 +19,7 @@ text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 trainer:
   max_grad_norm: 1.0
-  log_step: 26
+  log_step: 150
   n_epochs: 10
   epoch_len: null
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)

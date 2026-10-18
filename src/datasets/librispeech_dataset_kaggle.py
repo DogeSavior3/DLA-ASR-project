@@ -26,7 +26,6 @@ class LibrispeechDatasetKaggle(BaseDataset):
 
         self._data_dir = Path(data_dir)
         self._index_dir = Path(index_dir)
-        self._index_dir.mkdir(exist_ok=True, parents=True)
         if part == "train_all":
             index = sum(
                 [
@@ -43,13 +42,33 @@ class LibrispeechDatasetKaggle(BaseDataset):
 
     def _get_or_load_index(self, part):
         index_path = self._index_dir / f"{part}_index.json"
+        if not index_path.is_file():
+            matches = list(self._index_dir.rglob(index_path.name))
+            if len(matches) == 1:
+                index_path = matches[0]
+        if not index_path.is_file() and self._index_dir.is_relative_to("/kaggle/input"):
+            raise FileNotFoundError(
+                f"Missing index {part}_index.json under {self._index_dir}. "
+                "Attach the indexes dataset and check index_dir."
+            )
         if index_path.exists():
             with index_path.open() as f:
                 index = json.load(f)
         else:
             index = self._create_index(part)
+            self._index_dir.mkdir(exist_ok=True, parents=True)
             with index_path.open("w") as f:
                 json.dump(index, f, indent=2)
+        audio_dir = self._data_dir / part
+        nested_dir = audio_dir / "LibriSpeech" / part
+        if nested_dir.is_dir():
+            audio_dir = nested_dir
+        for entry in index:
+            old_path = Path(entry["path"])
+            split_dir = next(
+                parent for parent in old_path.parents if parent.name == part
+            )
+            entry["path"] = str(audio_dir / old_path.relative_to(split_dir))
         return index
 
     def _create_index(self, part):
@@ -62,13 +81,15 @@ class LibrispeechDatasetKaggle(BaseDataset):
         for dirpath, dirnames, filenames in os.walk(str(split_dir)):
             if any([f.endswith(".flac") for f in filenames]):
                 flac_dirs.add(dirpath)
-        for flac_dir in tqdm(
-            list(flac_dirs), desc=f"Preparing librispeech folders: {part}"
-        ):
+        for flac_dir in flac_dirs:
             flac_dir = Path(flac_dir)
             trans_path = list(flac_dir.glob("*.trans.txt"))[0]
             with trans_path.open() as f:
-                for line in f:
+                total = sum(1 for _ in f)
+                f.seek(0)
+                for line in tqdm(
+                    f, total=total, desc=f"Indexing LibriSpeech: {part}", unit="file"
+                ):
                     f_id = line.split()[0]
                     f_text = " ".join(line.split()[1:]).strip()
                     flac_path = flac_dir / f"{f_id}.flac"
