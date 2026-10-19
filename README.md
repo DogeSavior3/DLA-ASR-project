@@ -10,7 +10,7 @@
 
 ## About
 
-This project implements an automatic speech recognition (ASR) system with PyTorch, based on DeepSpeech2 with CTC decoding. It was developed for the [HSE DLA course](https://github.com/markovka17/dla) and uses the [ASR Project Template](https://github.com/Blinorot/pytorch_project_template/tree/example/asr) as its foundation.
+This project implements an automatic speech recognition (ASR) system with PyTorch, based on DeepSpeech2 with CTC decoding. It was developed for the [HSE DLA course](https://github.com/markovka17/dla).
 
 See the task assignment [here](https://github.com/markovka17/dla/tree/2024/hw1_asr).
 
@@ -42,21 +42,13 @@ The project uses [uv](https://docs.astral.sh/uv/) to manage Python and dependenc
 
    uv creates a `.venv` environment and downloads Python 3.13 if needed. Dependencies are defined in `pyproject.toml` and pinned in `uv.lock`.
 
-3. Activate the environment to use the commands below:
-
-   ```bash
-   source .venv/bin/activate
-   ```
-
-   Alternatively, run commands without activation using `uv run`, for example `uv run python train.py -cn=deepspeech2_baseline`.
-
-4. (Optional, for development) Install the pre-commit hooks:
-
-   ```bash
-   uv run pre-commit install
-   ```
-
 ## How To Use
+
+Activate the environment to use the commands below:
+
+```bash
+source .venv/bin/activate
+```
 
 To train a model, run the following command:
 
@@ -72,7 +64,9 @@ To run inference (evaluate the model or save predictions):
 python3 inference.py HYDRA_CONFIG_ARGUMENTS
 ```
 
-A demo notebook is available in the root of the project.
+Alternatively, run commands without activation using `uv run`, for example `uv run python train.py -cn=deepspeech2_baseline`.
+
+See [demo.ipynb](demo.ipynb) for downloading the final checkpoint, reproducing the reported result, and running inference on your own data.
 
 ## Credits
 
