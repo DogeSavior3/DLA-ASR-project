@@ -10,48 +10,50 @@
 
 ## About
 
-This repository contains a template for solving ASR task with PyTorch. This template branch is a part of the [HSE DLA course](https://github.com/markovka17/dla) ASR homework. Some parts of the code are missing (or do not follow the most optimal design choices...) and students are required to fill these parts themselves (as well as writing their own models, etc.).
+This project implements an automatic speech recognition (ASR) system with PyTorch, based on DeepSpeech2 with CTC decoding. It was developed for the [HSE DLA course](https://github.com/markovka17/dla).
 
 See the task assignment [here](https://github.com/markovka17/dla/tree/2024/hw1_asr).
 
 ## Installation
 
-Follow these steps to install the project:
+The project uses [uv](https://docs.astral.sh/uv/) to manage Python and dependencies.
 
-0. (Optional) Create and activate new environment using [`conda`](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html) or `venv` ([`+pyenv`](https://github.com/pyenv/pyenv)).
-
-   a. `conda` version:
+1. Install uv using the [official instructions](https://docs.astral.sh/uv/getting-started/installation/). For example, on Linux or macOS:
 
    ```bash
-   # create env
-   conda create -n project_env python=PYTHON_VERSION
-
-   # activate env
-   conda activate project_env
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-   b. `venv` (`+pyenv`) version:
+   Restart your terminal if `uv` is not yet available on your `PATH`.
+
+   On macOS, installing with Homebrew is recommended:
 
    ```bash
-   # create env
-   ~/.pyenv/versions/PYTHON_VERSION/bin/python3 -m venv project_env
-
-   # alternatively, using default python version
-   python3 -m venv project_env
-
-   # activate env
-   source project_env/bin/activate
+   brew install uv
    ```
 
-1. Install all required packages
+2. Clone the repository and install the locked dependencies:
 
    ```bash
-   pip install -r requirements.txt
+   git clone https://github.com/DogeSavior3/DLA-ASR-project.git
+   cd DLA-ASR-project
+   uv sync --locked --python 3.13
    ```
 
-2. Install `pre-commit`:
+   uv creates a `.venv` environment and downloads Python 3.13 if needed. Dependencies are defined in `pyproject.toml` and pinned in `uv.lock`.
+
+3. Activate the environment to use the commands below:
+
    ```bash
-   pre-commit install
+   source .venv/bin/activate
+   ```
+
+   Alternatively, run commands without activation using `uv run`, for example `uv run python train.py -cn=deepspeech2_baseline`.
+
+4. (Optional, for development) Install the pre-commit hooks:
+
+   ```bash
+   uv run pre-commit install
    ```
 
 ## How To Use
@@ -69,6 +71,8 @@ To run inference (evaluate the model or save predictions):
 ```bash
 python3 inference.py HYDRA_CONFIG_ARGUMENTS
 ```
+
+A demo notebook is available in the root of the project.
 
 ## Credits
 
