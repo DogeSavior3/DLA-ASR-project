@@ -10,7 +10,7 @@
 
 ## About
 
-This project implements an automatic speech recognition (ASR) system with PyTorch, based on DeepSpeech2 with CTC decoding. It was developed for the [HSE DLA course](https://github.com/markovka17/dla).
+This project implements an automatic speech recognition (ASR) system with PyTorch, based on DeepSpeech2 with CTC decoding. It was developed for the [HSE DLA course](https://github.com/markovka17/dla) and uses the [ASR Project Template](https://github.com/Blinorot/pytorch_project_template/tree/example/asr) as its foundation.
 
 See the task assignment [here](https://github.com/markovka17/dla/tree/2024/hw1_asr).
 
