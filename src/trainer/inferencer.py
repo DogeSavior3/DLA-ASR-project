@@ -1,7 +1,8 @@
+import sys
 from pathlib import Path
 
 import torch
-from tqdm.auto import tqdm
+from tqdm import tqdm
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
@@ -65,6 +66,18 @@ class Inferencer(BaseTrainer):
         self.batch_transforms = batch_transforms
 
         self.text_encoder = text_encoder
+        self.lm_decoder = None
+        if self.cfg_trainer.get("use_lm", False):
+            from src.utils.lm import CTCBeamSearchLM
+
+            self.lm_decoder = CTCBeamSearchLM(
+                text_encoder=text_encoder,
+                lm_path=self.cfg_trainer.lm_path,
+                lexicon_path=self.cfg_trainer.lexicon_path,
+                beam_size=self.cfg_trainer.lm_beam_size,
+                lm_weight=self.cfg_trainer.lm_weight,
+                word_score=self.cfg_trainer.word_score,
+            )
 
         # define dataloaders
         self.evaluation_dataloaders = {k: v for k, v in dataloaders.items()}
@@ -76,6 +89,14 @@ class Inferencer(BaseTrainer):
         # define metrics
         self.metrics = metrics
         if self.metrics is not None:
+            self.metrics = {
+                "inference": [
+                    met
+                    for met in metrics["inference"]
+                    if getattr(met, "prediction_key", None) != "beam_lm_text"
+                    or self.lm_decoder is not None
+                ]
+            }
             self.evaluation_metrics = MetricTracker(
                 *[m.name for m in self.metrics["inference"]],
                 writer=None,
@@ -137,6 +158,39 @@ class Inferencer(BaseTrainer):
         )
         labeled_indices = [i for i, present in enumerate(has_transcription) if present]
 
+        batch["argmax_text"] = []
+        batch["beam_text"] = []
+        if self.lm_decoder is not None:
+            batch["beam_lm_text"] = []
+
+        for i in range(batch_size):
+            length = int(batch["log_probs_length"][i])
+            log_probs = batch["log_probs"][i, :length].detach().float().cpu().numpy()
+            argmax_text = self.text_encoder.ctc_decode(
+                log_probs.argmax(axis=-1)
+            ).strip()
+            beam_text = ctc_beam_search(
+                log_probs,
+                beam_size=self.cfg_trainer.beam_size,
+                ind2char=self.text_encoder.ind2char,
+            )[0][0].strip()
+            batch["argmax_text"].append(argmax_text)
+            batch["beam_text"].append(beam_text)
+            predictions = [("argmax", argmax_text), ("beam", beam_text)]
+            if self.lm_decoder is not None:
+                lm_text = self.lm_decoder(log_probs)
+                batch["beam_lm_text"].append(lm_text)
+                predictions.append(("beam_lm", lm_text))
+
+            if self.save_path is not None:
+                utterance_id = Path(batch["audio_path"][i]).stem
+                for method, text in predictions:
+                    output_dir = self.save_path / part / method
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    (output_dir / f"{utterance_id}.txt").write_text(
+                        text.strip() + "\n", encoding="utf-8"
+                    )
+
         if metrics is not None and labeled_indices:
             metric_batch = {
                 "log_probs": batch["log_probs"][labeled_indices],
@@ -144,29 +198,16 @@ class Inferencer(BaseTrainer):
                 .detach()
                 .cpu()[labeled_indices],
                 "text": [batch["text"][i] for i in labeled_indices],
+                "argmax_text": [batch["argmax_text"][i] for i in labeled_indices],
+                "beam_text": [batch["beam_text"][i] for i in labeled_indices],
             }
+            if self.lm_decoder is not None:
+                metric_batch["beam_lm_text"] = [
+                    batch["beam_lm_text"][i] for i in labeled_indices
+                ]
             for met in self.metrics["inference"]:
                 metrics.update(met.name, met(**metric_batch), n=len(labeled_indices))
             self._scored_samples += len(labeled_indices)
-
-        for i in range(batch_size):
-            length = int(batch["log_probs_length"][i])
-            log_probs = batch["log_probs"][i, :length].detach().float().cpu().numpy()
-            argmax_text = self.text_encoder.ctc_decode(log_probs.argmax(axis=-1))
-            beam_text = ctc_beam_search(
-                log_probs,
-                beam_size=self.cfg_trainer.beam_size,
-                ind2char=self.text_encoder.ind2char,
-            )[0][0]
-
-            if self.save_path is not None:
-                utterance_id = Path(batch["audio_path"][i]).stem
-                for method, text in [("argmax", argmax_text), ("beam", beam_text)]:
-                    output_dir = self.save_path / part / method
-                    output_dir.mkdir(parents=True, exist_ok=True)
-                    (output_dir / f"{utterance_id}.txt").write_text(
-                        text.strip() + "\n", encoding="utf-8"
-                    )
 
         return batch
 
@@ -197,6 +238,7 @@ class Inferencer(BaseTrainer):
                 enumerate(dataloader),
                 desc=part,
                 total=len(dataloader),
+                file=sys.stdout,
             ):
                 batch = self.process_batch(
                     batch_idx=batch_idx,

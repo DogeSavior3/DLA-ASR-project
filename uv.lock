@@ -365,6 +365,19 @@ wheels = [
 ]
 
 [[package]]
+name = "ctc-beam-decoder"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a4/44/10728992ae4ee7803c52f624701cfd28918beab7f7700ab354918143ccd0/ctc_beam_decoder-0.2.0-py3-none-macosx_14_0_arm64.whl", hash = "sha256:6d9c57e1314bfbece1343869eee8f2ebbaaca0568fa4ca1499be2ad431e068eb", size = 292520, upload-time = "2026-08-08T01:24:20.162Z" },
+    { url = "https://files.pythonhosted.org/packages/76/09/cc6c080132217651c51ac52d8d102bcad626dffa4bcd1ac608db440375f4/ctc_beam_decoder-0.2.0-py3-none-manylinux_2_35_x86_64.whl", hash = "sha256:96f794658cda221aa57ffcdfdfbb6e035ebb1f05239dd9689b8ed011f90cbbbd", size = 380621, upload-time = "2026-08-08T01:24:21.455Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/c0/75f0d4b45044d31e33d922ce0d6ac1b729acccd11fbcef77af160ca92022/ctc_beam_decoder-0.2.0-py3-none-win_amd64.whl", hash = "sha256:9f43e3f9e5b5db8c51cfab79f9183c2a490ce0a36c33d33fb8d91cb4a708d6a2", size = 355408, upload-time = "2026-08-08T01:24:22.784Z" },
+]
+
+[[package]]
 name = "cycler"
 version = "0.12.1"
 source = { registry = "https://pypi.org/simple" }
@@ -430,6 +443,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "black" },
     { name = "comet-ml" },
+    { name = "ctc-beam-decoder" },
     { name = "datasets" },
     { name = "editdistance" },
     { name = "huggingface-hub" },
@@ -456,6 +470,7 @@ dependencies = [
 requires-dist = [
     { name = "black", specifier = ">=26.10.1" },
     { name = "comet-ml", specifier = ">=3.58.8" },
+    { name = "ctc-beam-decoder", specifier = "==0.2.0" },
     { name = "datasets", specifier = "==5.1.0" },
     { name = "editdistance", specifier = "==0.8.1" },
     { name = "huggingface-hub", specifier = "==2.2.0" },

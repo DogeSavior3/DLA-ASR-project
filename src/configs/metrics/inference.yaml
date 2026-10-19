@@ -1,12 +1,20 @@
 train: []
 inference:
-  - _target_: src.metrics.ArgmaxCERMetric
+  - _target_: src.metrics.text.TextCERMetric
     name: "CER_(Argmax)"
-  - _target_: src.metrics.ArgmaxWERMetric
+    prediction_key: argmax_text
+  - _target_: src.metrics.text.TextWERMetric
     name: "WER_(Argmax)"
-  - _target_: src.metrics.cer.BeamSearchCERMetric
+    prediction_key: argmax_text
+  - _target_: src.metrics.text.TextCERMetric
     name: "CER_(Beam${inferencer.beam_size})"
-    beam_size: ${inferencer.beam_size}
-  - _target_: src.metrics.wer.BeamSearchWERMetric
+    prediction_key: beam_text
+  - _target_: src.metrics.text.TextWERMetric
     name: "WER_(Beam${inferencer.beam_size})"
-    beam_size: ${inferencer.beam_size}
+    prediction_key: beam_text
+  - _target_: src.metrics.text.TextCERMetric
+    name: "CER_(Beam${inferencer.lm_beam_size}+LM)"
+    prediction_key: beam_lm_text
+  - _target_: src.metrics.text.TextWERMetric
+    name: "WER_(Beam${inferencer.lm_beam_size}+LM)"
+    prediction_key: beam_lm_text

@@ -1,4 +1,4 @@
-# Evaluate the final checkpoint on the complete LibriSpeech dev-other split.
+# Evaluate the final checkpoint on the complete LibriSpeech test-other split.
 defaults:
   - model: deepspeech2
   - metrics: inference
@@ -12,7 +12,7 @@ text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 
 dataloader:
-  batch_size: 1
+  batch_size: 80
 
 inferencer:
   device_tensors: ["spectrogram"]
@@ -20,4 +20,10 @@ inferencer:
   save_path: "reproduct"
   seed: 1
   from_pretrained: "saved/model_best.pth"
-  beam_size: 3
+  beam_size: 10
+  use_lm: true
+  lm_beam_size: 10
+  lm_weight: 0.5
+  word_score: 1.0
+  lm_path: null
+  lexicon_path: null

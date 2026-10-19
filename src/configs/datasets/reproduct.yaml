@@ -1,6 +1,6 @@
-dev_other:
+test_other:
   _target_: src.datasets.LibrispeechDataset
-  part: "dev-other"
+  part: "test-other"
   limit: null
   max_audio_length: null
   max_text_length: null

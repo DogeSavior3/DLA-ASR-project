@@ -21,6 +21,7 @@ colorama==0.4.6 ; sys_platform == 'win32'
 comet-ml==3.58.8
 configobj==5.0.9
 contourpy==1.4.0
+ctc-beam-decoder==0.2.0
 cycler==0.12.1
 datasets==5.1.0
 decorator==5.3.1
