@@ -12,7 +12,6 @@ class CommonVoiceDatasetKaggle(BaseDataset):
     def __init__(self, part, data_dir, index_dir, *args, **kwargs):
         self._data_dir = Path(data_dir)
         self._index_dir = Path(index_dir)
-        self._index_dir.mkdir(exist_ok=True, parents=True)
         parts = [part] if isinstance(part, str) else part
         index = []
         for split in parts:
@@ -22,11 +21,16 @@ class CommonVoiceDatasetKaggle(BaseDataset):
 
     def _get_or_load_index(self, part):
         index_path = self._index_dir / f"{part}_index.json"
-        if index_path.exists():
+        if not index_path.is_file():
+            matches = list(self._index_dir.rglob(index_path.name))
+            if len(matches) == 1:
+                index_path = matches[0]
+        if index_path.exists() or self._index_dir.is_relative_to("/kaggle/input"):
             with index_path.open() as f:
                 index = json.load(f)
         else:
             index = self._create_index(part)
+            self._index_dir.mkdir(exist_ok=True, parents=True)
             with index_path.open("w") as f:
                 json.dump(index, f, indent=2)
         for entry in index:
