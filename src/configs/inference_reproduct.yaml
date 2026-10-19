@@ -1,0 +1,23 @@
+# Evaluate the final checkpoint on the complete LibriSpeech dev-other split.
+defaults:
+  - model: deepspeech2
+  - metrics: inference
+  - datasets: reproduct
+  - dataloader: asr
+  - transforms: example_only_instance
+  - override transforms/instance_transforms: log_mel
+  - _self_
+
+text_encoder:
+  _target_: src.text_encoder.CTCTextEncoder
+
+dataloader:
+  batch_size: 1
+
+inferencer:
+  device_tensors: ["spectrogram"]
+  device: auto
+  save_path: "reproduct"
+  seed: 1
+  from_pretrained: "saved/model_best.pth"
+  beam_size: 3

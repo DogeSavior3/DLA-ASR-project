@@ -1,8 +1,11 @@
+from pathlib import Path
+
 import torch
 from tqdm.auto import tqdm
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
+from src.utils.beam_search import ctc_beam_search
 
 
 class Inferencer(BaseTrainer):
@@ -120,42 +123,50 @@ class Inferencer(BaseTrainer):
                 the dataloader (possibly transformed via batch transform)
                 and model outputs.
         """
-        # TODO change inference logic so it suits ASR assignment
-        # and task pipeline
-
         batch = self.move_batch_to_device(batch)
         batch = self.transform_batch(batch)  # transform batch on device -- faster
 
         outputs = self.model(**batch)
         batch.update(outputs)
 
-        if metrics is not None:
+        batch_size = batch["log_probs"].shape[0]
+        has_transcription = (
+            batch["has_transcription"]
+            if "has_transcription" in batch
+            else [True] * batch_size
+        )
+        labeled_indices = [i for i, present in enumerate(has_transcription) if present]
+
+        if metrics is not None and labeled_indices:
+            metric_batch = {
+                "log_probs": batch["log_probs"][labeled_indices],
+                "log_probs_length": batch["log_probs_length"]
+                .detach()
+                .cpu()[labeled_indices],
+                "text": [batch["text"][i] for i in labeled_indices],
+            }
             for met in self.metrics["inference"]:
-                metrics.update(met.name, met(**batch))
-
-        # Some saving logic. This is an example
-        # Use if you need to save predictions on disk
-
-        batch_size = batch["logits"].shape[0]
-        current_id = batch_idx * batch_size
+                metrics.update(met.name, met(**metric_batch), n=len(labeled_indices))
+            self._scored_samples += len(labeled_indices)
 
         for i in range(batch_size):
-            # clone because of
-            # https://github.com/pytorch/pytorch/issues/1995
-            logits = batch["logits"][i].clone()
-            label = batch["labels"][i].clone()
-            pred_label = logits.argmax(dim=-1)
-
-            output_id = current_id + i
-
-            output = {
-                "pred_label": pred_label,
-                "label": label,
-            }
+            length = int(batch["log_probs_length"][i])
+            log_probs = batch["log_probs"][i, :length].detach().float().cpu().numpy()
+            argmax_text = self.text_encoder.ctc_decode(log_probs.argmax(axis=-1))
+            beam_text = ctc_beam_search(
+                log_probs,
+                beam_size=self.cfg_trainer.beam_size,
+                ind2char=self.text_encoder.ind2char,
+            )[0][0]
 
             if self.save_path is not None:
-                # you can use safetensors or other lib here
-                torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                utterance_id = Path(batch["audio_path"][i]).stem
+                for method, text in [("argmax", argmax_text), ("beam", beam_text)]:
+                    output_dir = self.save_path / part / method
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    (output_dir / f"{utterance_id}.txt").write_text(
+                        text.strip() + "\n", encoding="utf-8"
+                    )
 
         return batch
 
@@ -173,7 +184,9 @@ class Inferencer(BaseTrainer):
         self.is_train = False
         self.model.eval()
 
-        self.evaluation_metrics.reset()
+        self._scored_samples = 0
+        if self.evaluation_metrics is not None:
+            self.evaluation_metrics.reset()
 
         # create Save dir
         if self.save_path is not None:
@@ -192,4 +205,6 @@ class Inferencer(BaseTrainer):
                     metrics=self.evaluation_metrics,
                 )
 
-        return self.evaluation_metrics.result()
+        if self.evaluation_metrics is not None and self._scored_samples:
+            return self.evaluation_metrics.result()
+        return {}

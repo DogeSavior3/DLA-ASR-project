@@ -97,6 +97,8 @@ class BaseDataset(Dataset):
             "text_encoded": text_encoded,
             "audio_path": audio_path,
         }
+        if "has_transcription" in data_dict:
+            instance_data["has_transcription"] = data_dict["has_transcription"]
 
         # TODO think of how to apply wave augs before calculating spectrogram
         # Note: you may want to preserve both audio in time domain and

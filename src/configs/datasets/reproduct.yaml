@@ -1,0 +1,7 @@
+dev_other:
+  _target_: src.datasets.LibrispeechDataset
+  part: "dev-other"
+  limit: null
+  max_audio_length: null
+  max_text_length: null
+  instance_transforms: ${transforms.instance_transforms.inference}

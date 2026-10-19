@@ -1,0 +1,10 @@
+# Input layout: dataset_dir/audio/ and optional dataset_dir/transcriptions/.
+defaults:
+  - inference_reproduct
+  - override datasets: custom
+  - _self_
+
+dataset_dir: ??? # Set to the extracted dataset directory.
+
+inferencer:
+  save_path: "custom"

@@ -36,6 +36,10 @@ def collate_fn(dataset_items: list[dict]):
         "text_encoded": batch_texts,
         "text_encoded_length": text_encoded_length,
         "text": [item["text"] for item in dataset_items],
+        "has_transcription": [
+            item["has_transcription"] if "has_transcription" in item else True
+            for item in dataset_items
+        ],
         "audio_path": [item["audio_path"] for item in dataset_items],
         "audio": [item["audio"] for item in dataset_items],
     }

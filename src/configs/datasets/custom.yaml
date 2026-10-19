@@ -1,0 +1,8 @@
+custom:
+  _target_: src.datasets.CustomDirAudioDataset
+  audio_dir: ${dataset_dir}/audio
+  transcription_dir: ${dataset_dir}/transcriptions
+  limit: null
+  max_audio_length: null
+  max_text_length: null
+  instance_transforms: ${transforms.instance_transforms.inference}
